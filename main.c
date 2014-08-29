@@ -18,16 +18,26 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <fcntl.h>
 #include <ctype.h>
 
+#define SIZE_ROW	0xF
+
 int
 main(int argc, char **argv)
 {
-    int fd;
+
+
+    FILE *fd;
     char *file = NULL;
-    unsigned char buff[16];
+    char buff[16];
+    char car;
+    char n; 
+    int row=0;
+    char cad[10];
+    int i=0;
 
     if(argc != 2)
     {
@@ -37,18 +47,45 @@ main(int argc, char **argv)
 
     file = argv[1];
 
-    fd = open(file, O_RDONLY);
+    fd = fopen(file, "r");
 
     if(fd < 0)
     {
         printf ("Error");
         exit(1);
     }
+    else {
+		printf("%.6x ",row);
+		do{
+			fread(&car, sizeof(char), 1, fd);
+			printf("%.2x ",car);
+			if(car == '\n'){
+				if(!feof(fd))
+				buff[i] = '.';
+			}
+			else
+				buff[i] = car;
+			if(i<SIZE_ROW){
+				i++;
+			}
+			else{
+				i=0;
+				printf(">%s<\n",&buff[0]);
+				row += 0x10;
+				printf("%.6x ",row);
+			}
+		}
+		while(!feof(fd));
+		for(n=i; n<=SIZE_ROW;n++){
+			printf("   ");
+			buff[n-1] = 0;
+		}
+		printf(">%s<\n",&buff[0]);
+		printf("\n");
+    }
 
     /* Print complete file content following od hex format */
     /* od -A x -t x1z -v file.dat */
 
     close (fd);
-
-    return 0;
 }
